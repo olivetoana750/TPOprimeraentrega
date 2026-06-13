@@ -4,12 +4,17 @@ import modelos.MovimientoInventario;
 import modelos.Pedido;
 import modelos.Producto;
 import tda.ColaCircular;
+import tda.ColaPrioridad;
 import tda.Pila;
 
 public class SistemaLogistico {
 
     private Pila historialMovimientos;
     private ColaCircular colaExpedicion;
+    private ColaPrioridad inventarioCritico;
+
+    // Umbral de stock critico: si un producto cae por debajo, se encola automaticamente
+    static final int UMBRAL_CRITICO = 50;
 
     // Usamos un arreglo simple para guardar los productos registrados
     // (el ABB va en la proxima entrega, por ahora alcanza para demostrar)
@@ -22,6 +27,8 @@ public class SistemaLogistico {
         historialMovimientos.crearPila();
         colaExpedicion = new ColaCircular();
         colaExpedicion.inicializarCola();
+        inventarioCritico = new ColaPrioridad();
+        inventarioCritico.crear();
         productos = new Producto[MAX_PRODUCTOS];
         cantProductos = 0;
     }
@@ -128,6 +135,11 @@ public class SistemaLogistico {
 
         System.out.println("Egreso registrado: " + cantidad + " unidades de " + p.getNombre()
                 + ". Stock actual: " + p.getStockActual());
+
+        // Si el stock cae por debajo del umbral, se encola automaticamente en inventario critico
+        if (p.getStockActual() < UMBRAL_CRITICO) {
+            encolarsienCritico(p);
+        }
     }
 
     public void deshacerUltimoMovimiento() {
@@ -189,5 +201,69 @@ public class SistemaLogistico {
     // Metodo auxiliar para evitar duplicados en la cola
     private boolean buscarPedidoEnCola(String numero) {
         return colaExpedicion.contienePedido(numero);
+    }
+
+    // =============================================
+    // CONTROL DE INVENTARIO CRITICO - COLA CON PRIORIDAD
+    // =============================================
+
+    // Encola un producto en inventario critico si no estaba ya
+    // La prioridad es inversamente proporcional al stock: menos stock = mas prioridad
+    private void encolarsienCritico(Producto p) {
+        if (!inventarioCritico.contieneProducto(p.getCodigoUniversal())) {
+            int prioridad = UMBRAL_CRITICO - p.getStockActual();
+            inventarioCritico.insertar(p, prioridad);
+            System.out.println("ALERTA: " + p.getNombre() + " ingreso a inventario critico. Stock: "
+                    + p.getStockActual() + " unidades (umbral: " + UMBRAL_CRITICO + ").");
+        }
+    }
+
+    // Encolar manualmente un producto como critico
+    public void marcarProductoCritico(String codigo) {
+        Producto p = buscarProducto(codigo);
+        if (p == null) {
+            System.out.println("Error: no existe un producto con el codigo " + codigo + ".");
+            return;
+        }
+        if (inventarioCritico.contieneProducto(codigo)) {
+            System.out.println("El producto " + p.getNombre() + " ya esta en inventario critico.");
+            return;
+        }
+        int prioridad = Math.max(1, UMBRAL_CRITICO - p.getStockActual());
+        inventarioCritico.insertar(p, prioridad);
+        System.out.println("Producto marcado como critico: " + p.getNombre()
+                + " | Stock: " + p.getStockActual() + " | Prioridad: " + prioridad);
+    }
+
+    // Atender el producto mas urgente (el de menor stock)
+    public void atenderProductoCritico() {
+        ColaPrioridad.Elemento elemento = inventarioCritico.eliminar();
+        if (elemento == null) {
+            System.out.println("No hay productos criticos para atender.");
+            return;
+        }
+        System.out.println("Atendiendo producto mas urgente: " + elemento.producto.getNombre()
+                + " (" + elemento.producto.getCodigoUniversal() + ")"
+                + " | Stock actual: " + elemento.producto.getStockActual() + " unidades"
+                + " | Prioridad: " + elemento.prioridad);
+        System.out.println("Accion requerida: reponer stock de " + elemento.producto.getNombre()
+                + " en " + elemento.producto.getUbicacion() + ".");
+    }
+
+    // Ver el producto mas urgente sin atenderlo
+    public void verProximoCritico() {
+        ColaPrioridad.Elemento elemento = inventarioCritico.frente();
+        if (elemento == null) {
+            System.out.println("No hay productos criticos en este momento.");
+            return;
+        }
+        System.out.println("Proximo a atender: " + elemento.producto.getNombre()
+                + " | Stock: " + elemento.producto.getStockActual()
+                + " | Prioridad: " + elemento.prioridad);
+    }
+
+    // Mostrar todos los productos criticos
+    public void mostrarInventarioCritico() {
+        inventarioCritico.mostrar();
     }
 }

@@ -9,10 +9,7 @@ public class Main {
     static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
-
-        // Cargamos algunos productos de ejemplo para facilitar las pruebas
         cargarDatosEjemplo();
-
         int opcion;
         do {
             mostrarMenu();
@@ -21,7 +18,6 @@ public class Main {
             procesarOpcion(opcion);
             System.out.println();
         } while (opcion != 0);
-
         scanner.close();
     }
 
@@ -43,6 +39,11 @@ public class Main {
         System.out.println("  9. Despachar siguiente pedido");
         System.out.println(" 10. Ver cola de pedidos");
         System.out.println(" 11. Ver proximo pedido a despachar");
+        System.out.println("--- INVENTARIO CRITICO (COLA CON PRIORIDAD) ---");
+        System.out.println(" 12. Ver productos criticos");
+        System.out.println(" 13. Atender producto mas urgente");
+        System.out.println(" 14. Ver proximo producto critico");
+        System.out.println(" 15. Marcar producto como critico manualmente");
         System.out.println("----------------------------------------");
         System.out.println("  0. Salir");
         System.out.println("========================================");
@@ -50,11 +51,9 @@ public class Main {
 
     static void procesarOpcion(int opcion) {
         switch (opcion) {
-
             case 1:
                 sistema.mostrarProductos();
                 break;
-
             case 2:
                 System.out.print("Codigo universal: ");
                 String codigo = scanner.nextLine().trim();
@@ -65,7 +64,6 @@ public class Main {
                 int stockInicial = leerEntero("Stock inicial: ");
                 sistema.agregarProducto(codigo, nombre, ubicacion, stockInicial);
                 break;
-
             case 3:
                 System.out.print("Ingrese el codigo del producto: ");
                 String cod = scanner.nextLine().trim();
@@ -76,29 +74,24 @@ public class Main {
                     System.out.println("No se encontro ningun producto con el codigo " + cod + ".");
                 }
                 break;
-
             case 4:
                 System.out.print("Codigo del producto: ");
                 String codIngreso = scanner.nextLine().trim();
                 int cantIngreso = leerEntero("Cantidad a ingresar: ");
                 sistema.registrarIngreso(codIngreso, cantIngreso);
                 break;
-
             case 5:
                 System.out.print("Codigo del producto: ");
                 String codEgreso = scanner.nextLine().trim();
                 int cantEgreso = leerEntero("Cantidad a egresar: ");
                 sistema.registrarEgreso(codEgreso, cantEgreso);
                 break;
-
             case 6:
                 sistema.deshacerUltimoMovimiento();
                 break;
-
             case 7:
                 sistema.mostrarHistorial();
                 break;
-
             case 8:
                 System.out.print("Numero de pedido: ");
                 String numPedido = scanner.nextLine().trim();
@@ -109,32 +102,40 @@ public class Main {
                 int bultos = leerEntero("Cantidad de bultos: ");
                 sistema.agregarPedido(numPedido, destinatario, destino, bultos);
                 break;
-
             case 9:
                 sistema.despacharPedido();
                 break;
-
             case 10:
                 sistema.mostrarColaPedidos();
                 break;
-
             case 11:
                 modelos.Pedido proximo = sistema.verProximoPedido();
                 if (proximo != null) {
                     System.out.println("Proximo pedido a despachar: " + proximo);
                 }
                 break;
-
+            case 12:
+                sistema.mostrarInventarioCritico();
+                break;
+            case 13:
+                sistema.atenderProductoCritico();
+                break;
+            case 14:
+                sistema.verProximoCritico();
+                break;
+            case 15:
+                System.out.print("Codigo del producto a marcar como critico: ");
+                String codCritico = scanner.nextLine().trim();
+                sistema.marcarProductoCritico(codCritico);
+                break;
             case 0:
                 System.out.println("Saliendo del sistema. Hasta luego.");
                 break;
-
             default:
-                System.out.println("Opcion invalida. Ingrese un numero del 0 al 11.");
+                System.out.println("Opcion invalida. Ingrese un numero del 0 al 15.");
         }
     }
 
-    // Lee un entero y valida que no sea texto
     static int leerEntero(String mensaje) {
         int valor = -1;
         boolean valido = false;
@@ -151,12 +152,15 @@ public class Main {
         return valor;
     }
 
-    // Datos de ejemplo para que el sistema arranque con algo cargado
     static void cargarDatosEjemplo() {
         System.out.println("Cargando datos de ejemplo...");
         sistema.agregarProducto("PROD-001", "Aceite de girasol 1L", "Pasillo-A", 200);
         sistema.agregarProducto("PROD-002", "Arroz largo fino 1kg", "Pasillo-B", 150);
         sistema.agregarProducto("PROD-003", "Leche entera 1L", "Pasillo-C", 300);
+        sistema.agregarProducto("PROD-004", "Azucar 1kg", "Pasillo-A", 12);
+        sistema.agregarProducto("PROD-005", "Harina 000 1kg", "Pasillo-B", 35);
+        sistema.marcarProductoCritico("PROD-004");
+        sistema.marcarProductoCritico("PROD-005");
         sistema.agregarPedido("PED-001", "Supermercado Garcia", "Rosario, Santa Fe", 12);
         sistema.agregarPedido("PED-002", "Distribuidora Lopez", "Cordoba Capital", 8);
         System.out.println("Datos cargados. Sistema listo.\n");
