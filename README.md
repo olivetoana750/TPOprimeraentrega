@@ -88,7 +88,7 @@ El sistema carga datos de ejemplo automáticamente al iniciar (3 productos y 2 p
 ---
 
 ## Link del repositorio
-[https://github.com/usuario/centro-logistico](https://github.com/usuario/centro-logistico)
+https://github.com/olivetoana750/TPOprimeraentrega
 *(actualizar con el link real una vez creado el repositorio)*
 
 ---
