@@ -26,6 +26,10 @@ siempre está en el tope y puede revertirse en O(1) ante un error operativo.
 Los pedidos listos para despachar se encolan en orden de llegada. La variante circular reutiliza
 el espacio liberado por pedidos ya despachados sin mover elementos en memoria.
 
+### Cola con Prioridad — Control de Inventario Crítico
+Los productos con stock bajo se insertan ordenados por urgencia. A menor stock,
+mayor prioridad. El frente de la cola siempre tiene el producto más urgente para reponer.
+
 ---
 
 ## Funcionalidades implementadas en esta segunda etapa
@@ -42,67 +46,47 @@ el espacio liberado por pedidos ya despachados sin mover elementos en memoria.
 - Ver todos los pedidos en espera
 - Consultar el próximo pedido a despachar sin eliminarlo
 
+### 3. Control de Inventario Crítico (Cola con Prioridad)
+- Detectar automáticamente productos que caen por debajo del umbral de stock crítico (50 unidades)
+- Ordenar productos críticos por urgencia: menor stock = mayor prioridad
+- Atender el producto más urgente primero
+- Ver el próximo producto crítico sin atenderlo
+- Marcar productos como críticos manualmente
+
 ### Gestión de inventario base
 - Agregar productos con código universal, nombre, ubicación y stock
 - Buscar producto por código
 - Ver todos los productos registrados
 
----
-
 ## Estructura del proyecto
-
-```
-src/
-├── modelos/
-│   ├── Producto.java              → entidad producto del depósito
-│   ├── MovimientoInventario.java  → registro de cada operación de stock
-│   └── Pedido.java                → pedido listo para despachar
-├── tda/
-│   ├── Pila.java                  → TDA Pila adaptado para MovimientoInventario
-│   └── ColaCircular.java          → TDA Cola Circular adaptado para Pedido
-├── sistema/
-│   └── SistemaLogistico.java      → integra los TDAs y expone operaciones de negocio
-└── Main.java                      → menú interactivo demostrable
-```
-
----
-
+<!-- src/
+    modelos/
+       Producto.java -->  entidad producto del depósito
+       MovimientoInventario.java --> registro de cada operación de stock
+        Pedido.java→ pedido listo para despachar
+    tda/
+        Pila.java→ TDA Pila adaptado para MovimientoInventario
+        ColaCircular.java --> TDA Cola Circular adaptado para Pedido
+        ColaPrioridad.java --> TDA Cola con Prioridad adaptado para Producto
+    sistema/
+        SistemaLogistico.java→ integra los TDAs y expone operaciones de negocio
+    Main.java --> menú
 ## Cómo ejecutar el proyecto
-
-### Desde la terminal (sin IDE)
-```bash
-# Compilar (desde la raíz del proyecto)
-javac -d out -sourcepath src src/modelos/Producto.java src/modelos/MovimientoInventario.java src/modelos/Pedido.java src/tda/Pila.java src/tda/ColaCircular.java src/sistema/SistemaLogistico.java src/Main.java
-
-# Ejecutar
-java -cp out Main
-```
 
 ### Desde IntelliJ IDEA
 1. Abrir el proyecto como proyecto Java
 2. Marcar la carpeta `src` como Sources Root
 3. Ejecutar `Main.java`
 
-El sistema carga datos de ejemplo automáticamente al iniciar (3 productos y 2 pedidos).
-
----
+El sistema carga datos de ejemplo automáticamente al iniciar (5 productos y 2 pedidos).
 
 ## Link del repositorio
 https://github.com/olivetoana750/TPOprimeraentrega
-*(actualizar con el link real una vez creado el repositorio)*
-
----
 
 ## Actividades realizadas por cada integrante
-
-| Integrante | Actividades |
-|---|---|
-| Francesca Dascanio | TDA Pila, modelo MovimientoInventario, funcionalidades de trazabilidad de lotes en SistemaLogistico |
-| Ana Oliveto | TDA ColaCircular, modelo Pedido, funcionalidades de expedición en SistemaLogistico, Main y README |
-
----
+Francesca Dascanio -->TDA Pila, modelo MovimientoInventario, funcionalidades de trazabilidad de lotes en SistemaLogistico |
+Ana Oliveto-->TDA ColaCircular, TDA ColaPrioridad, modelos Pedido y Producto, funcionalidades de expedición e inventario crítico en SistemaLogistico, Main y README |
 
 ## Próxima entrega (funcionalidades pendientes)
 - **Localización de Stock:** Árbol Binario de Búsqueda (ABB) para búsqueda en O(log n) por código
-- **Control de Inventario Crítico:** Cola con Prioridad para gestionar productos con stock bajo
 - **Optimización de Recolección:** Grafo con algoritmo de Dijkstra para rutas mínimas entre pasillos
