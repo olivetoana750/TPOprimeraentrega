@@ -1,4 +1,4 @@
-package modelos;
+package model;
 
 public class MovimientoInventario {
     private String tipoOperacion;   // "INGRESO", "EGRESO" o "MODIFICACION"

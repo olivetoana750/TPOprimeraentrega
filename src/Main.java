@@ -1,4 +1,4 @@
-import modelos.Producto;
+import model.Producto;
 import sistema.SistemaLogistico;
 
 import java.util.Scanner;
@@ -109,7 +109,7 @@ public class Main {
                 sistema.mostrarColaPedidos();
                 break;
             case 11:
-                modelos.Pedido proximo = sistema.verProximoPedido();
+                model.Pedido proximo = sistema.verProximoPedido();
                 if (proximo != null) {
                     System.out.println("Proximo pedido a despachar: " + proximo);
                 }

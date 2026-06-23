@@ -1,6 +1,6 @@
 package tda;
 
-import modelos.MovimientoInventario;
+import model.MovimientoInventario;
 
 public class Pila {
     static final int MAX = 50;

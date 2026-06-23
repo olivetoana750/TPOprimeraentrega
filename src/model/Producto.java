@@ -1,4 +1,4 @@
-package modelos;
+package model;
 
 public class Producto {
     private String codigoUniversal;

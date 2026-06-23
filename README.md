@@ -60,7 +60,7 @@ mayor prioridad. El frente de la cola siempre tiene el producto más urgente par
 
 ## Estructura del proyecto
 <!-- src/
-    modelos/
+    model/
        Producto.java -->  entidad producto del depósito
        MovimientoInventario.java --> registro de cada operación de stock
         Pedido.java→ pedido listo para despachar
@@ -85,7 +85,7 @@ https://github.com/olivetoana750/TPOprimeraentrega
 
 ## Actividades realizadas por cada integrante
 Francesca Dascanio -->TDA Pila, modelo MovimientoInventario, funcionalidades de trazabilidad de lotes en SistemaLogistico |
-Ana Oliveto-->TDA ColaCircular, TDA ColaPrioridad, modelos Pedido y Producto, funcionalidades de expedición e inventario crítico en SistemaLogistico, Main y README |
+Ana Oliveto-->TDA ColaCircular, TDA ColaPrioridad, model Pedido y Producto, funcionalidades de expedición e inventario crítico en SistemaLogistico, Main y README |
 
 ## Próxima entrega (funcionalidades pendientes)
 - **Localización de Stock:** Árbol Binario de Búsqueda (ABB) para búsqueda en O(log n) por código

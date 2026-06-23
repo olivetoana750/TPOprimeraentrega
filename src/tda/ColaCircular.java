@@ -1,6 +1,6 @@
 package tda;
 
-import modelos.Pedido;
+import model.Pedido;
 
 public class ColaCircular {
     static final int MAX = 20;

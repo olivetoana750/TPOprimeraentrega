@@ -1,8 +1,9 @@
 package sistema;
 
-import modelos.MovimientoInventario;
-import modelos.Pedido;
-import modelos.Producto;
+import model.MovimientoInventario;
+import model.Pedido;
+import model.Producto;
+import tda.ABB;
 import tda.ColaCircular;
 import tda.ColaPrioridad;
 import tda.Pila;
@@ -12,15 +13,9 @@ public class SistemaLogistico {
     private Pila historialMovimientos;
     private ColaCircular colaExpedicion;
     private ColaPrioridad inventarioCritico;
+    private ABB arbolProductos;
 
-    // Umbral de stock critico: si un producto cae por debajo, se encola automaticamente
     static final int UMBRAL_CRITICO = 50;
-
-    // Usamos un arreglo simple para guardar los productos registrados
-    // (el ABB va en la proxima entrega, por ahora alcanza para demostrar)
-    private Producto[] productos;
-    private int cantProductos;
-    static final int MAX_PRODUCTOS = 50;
 
     public SistemaLogistico() {
         historialMovimientos = new Pila();
@@ -29,47 +24,52 @@ public class SistemaLogistico {
         colaExpedicion.inicializarCola();
         inventarioCritico = new ColaPrioridad();
         inventarioCritico.crear();
-        productos = new Producto[MAX_PRODUCTOS];
-        cantProductos = 0;
+        arbolProductos = new ABB();
     }
 
     // =============================================
-    // GESTION DE PRODUCTOS
+    // GESTION DE PRODUCTOS - ABB
     // =============================================
 
     public boolean agregarProducto(String codigo, String nombre, String ubicacion, int stockInicial) {
-        if (buscarProducto(codigo) != null) {
+        if (arbolProductos.buscar(codigo) != null) {
             System.out.println("Error: ya existe un producto con el codigo " + codigo + ".");
             return false;
         }
-        if (cantProductos >= MAX_PRODUCTOS) {
-            System.out.println("Error: capacidad maxima de productos alcanzada.");
-            return false;
-        }
-        productos[cantProductos] = new Producto(codigo, nombre, ubicacion, stockInicial);
-        cantProductos++;
+        Producto p = new Producto(codigo, nombre, ubicacion, stockInicial);
+        arbolProductos.insertar(p);
         System.out.println("Producto agregado correctamente: " + nombre + " (" + codigo + ")");
+        if (stockInicial < UMBRAL_CRITICO) {
+            encolarSiCritico(p);
+        }
         return true;
     }
 
     public Producto buscarProducto(String codigo) {
-        for (int i = 0; i < cantProductos; i++) {
-            if (productos[i].getCodigoUniversal().equalsIgnoreCase(codigo)) {
-                return productos[i];
-            }
+        return arbolProductos.buscar(codigo);
+    }
+
+    public boolean eliminarProducto(String codigo) {
+        Producto p = arbolProductos.buscar(codigo);
+        if (p == null) {
+            System.out.println("Error: no existe un producto con el codigo " + codigo + ".");
+            return false;
         }
-        return null;
+        arbolProductos.eliminar(codigo);
+        System.out.println("Producto eliminado: " + p.getNombre() + " (" + codigo + ")");
+        return true;
     }
 
     public void mostrarProductos() {
-        if (cantProductos == 0) {
-            System.out.println("No hay productos registrados.");
-            return;
-        }
-        System.out.println("=== INVENTARIO DE PRODUCTOS ===");
-        for (int i = 0; i < cantProductos; i++) {
-            System.out.println("  " + (i + 1) + ". " + productos[i]);
-        }
+        arbolProductos.mostrarInorden();
+    }
+
+    public void mostrarProductosPreorden() {
+        arbolProductos.mostrarPreorden();
+    }
+
+    public void mostrarProductosPostorden() {
+        arbolProductos.mostrarPostorden();
     }
 
     // =============================================
@@ -86,20 +86,12 @@ public class SistemaLogistico {
             System.out.println("Error: la cantidad debe ser mayor a 0.");
             return;
         }
-
         int stockAntes = p.getStockActual();
         p.setStockActual(stockAntes + cantidad);
-
         MovimientoInventario movimiento = new MovimientoInventario(
-                "INGRESO",
-                p.getCodigoUniversal(),
-                p.getNombre(),
-                stockAntes,
-                p.getStockActual(),
-                "Ingreso de " + cantidad + " unidades"
-        );
+                "INGRESO", p.getCodigoUniversal(), p.getNombre(),
+                stockAntes, p.getStockActual(), "Ingreso de " + cantidad + " unidades");
         historialMovimientos.apilar(movimiento);
-
         System.out.println("Ingreso registrado: " + cantidad + " unidades de " + p.getNombre()
                 + ". Stock actual: " + p.getStockActual());
     }
@@ -119,26 +111,16 @@ public class SistemaLogistico {
                     + ", cantidad solicitada: " + cantidad + ".");
             return;
         }
-
         int stockAntes = p.getStockActual();
         p.setStockActual(stockAntes - cantidad);
-
         MovimientoInventario movimiento = new MovimientoInventario(
-                "EGRESO",
-                p.getCodigoUniversal(),
-                p.getNombre(),
-                stockAntes,
-                p.getStockActual(),
-                "Egreso de " + cantidad + " unidades"
-        );
+                "EGRESO", p.getCodigoUniversal(), p.getNombre(),
+                stockAntes, p.getStockActual(), "Egreso de " + cantidad + " unidades");
         historialMovimientos.apilar(movimiento);
-
         System.out.println("Egreso registrado: " + cantidad + " unidades de " + p.getNombre()
                 + ". Stock actual: " + p.getStockActual());
-
-        // Si el stock cae por debajo del umbral, se encola automaticamente en inventario critico
         if (p.getStockActual() < UMBRAL_CRITICO) {
-            encolarsienCritico(p);
+            encolarSiCritico(p);
         }
     }
 
@@ -147,15 +129,12 @@ public class SistemaLogistico {
             System.out.println("No hay movimientos para deshacer.");
             return;
         }
-
         MovimientoInventario ultimo = historialMovimientos.desapilar();
         Producto p = buscarProducto(ultimo.getCodigoProducto());
-
         if (p == null) {
             System.out.println("Error: no se encontro el producto del movimiento a deshacer.");
             return;
         }
-
         p.setStockActual(ultimo.getStockAntes());
         System.out.println("Movimiento deshecho: " + ultimo.getDescripcion()
                 + " sobre " + ultimo.getNombreProducto()
@@ -171,7 +150,7 @@ public class SistemaLogistico {
     // =============================================
 
     public void agregarPedido(String numero, String destinatario, String destino, int bultos) {
-        if (buscarPedidoEnCola(numero)) {
+        if (colaExpedicion.contienePedido(numero)) {
             System.out.println("Error: ya existe un pedido con el numero " + numero + " en la cola.");
             return;
         }
@@ -198,18 +177,11 @@ public class SistemaLogistico {
         return colaExpedicion.recuperarFrente();
     }
 
-    // Metodo auxiliar para evitar duplicados en la cola
-    private boolean buscarPedidoEnCola(String numero) {
-        return colaExpedicion.contienePedido(numero);
-    }
-
     // =============================================
-    // CONTROL DE INVENTARIO CRITICO - COLA CON PRIORIDAD
+    // INVENTARIO CRITICO - COLA CON PRIORIDAD
     // =============================================
 
-    // Encola un producto en inventario critico si no estaba ya
-    // La prioridad es inversamente proporcional al stock: menos stock = mas prioridad
-    private void encolarsienCritico(Producto p) {
+    private void encolarSiCritico(Producto p) {
         if (!inventarioCritico.contieneProducto(p.getCodigoUniversal())) {
             int prioridad = UMBRAL_CRITICO - p.getStockActual();
             inventarioCritico.insertar(p, prioridad);
@@ -218,7 +190,6 @@ public class SistemaLogistico {
         }
     }
 
-    // Encolar manualmente un producto como critico
     public void marcarProductoCritico(String codigo) {
         Producto p = buscarProducto(codigo);
         if (p == null) {
@@ -235,7 +206,6 @@ public class SistemaLogistico {
                 + " | Stock: " + p.getStockActual() + " | Prioridad: " + prioridad);
     }
 
-    // Atender el producto mas urgente (el de menor stock)
     public void atenderProductoCritico() {
         ColaPrioridad.Elemento elemento = inventarioCritico.eliminar();
         if (elemento == null) {
@@ -250,7 +220,6 @@ public class SistemaLogistico {
                 + " en " + elemento.producto.getUbicacion() + ".");
     }
 
-    // Ver el producto mas urgente sin atenderlo
     public void verProximoCritico() {
         ColaPrioridad.Elemento elemento = inventarioCritico.frente();
         if (elemento == null) {
@@ -262,7 +231,6 @@ public class SistemaLogistico {
                 + " | Prioridad: " + elemento.prioridad);
     }
 
-    // Mostrar todos los productos criticos
     public void mostrarInventarioCritico() {
         inventarioCritico.mostrar();
     }

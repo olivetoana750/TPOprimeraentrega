@@ -1,6 +1,6 @@
 package tda;
 
-import modelos.Producto;
+import model.Producto;
 
 public class ColaPrioridad {
 
