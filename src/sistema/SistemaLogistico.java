@@ -6,6 +6,7 @@ import model.Producto;
 import tda.ABB;
 import tda.ColaCircular;
 import tda.ColaPrioridad;
+import tda.Grafo;
 import tda.Pila;
 
 public class SistemaLogistico {
@@ -14,6 +15,7 @@ public class SistemaLogistico {
     private ColaCircular colaExpedicion;
     private ColaPrioridad inventarioCritico;
     private ABB arbolProductos;
+    private Grafo grafoAlmacen;
 
     static final int UMBRAL_CRITICO = 50;
 
@@ -25,6 +27,7 @@ public class SistemaLogistico {
         inventarioCritico = new ColaPrioridad();
         inventarioCritico.crear();
         arbolProductos = new ABB();
+        grafoAlmacen = new Grafo();
     }
 
     // =============================================
@@ -39,6 +42,8 @@ public class SistemaLogistico {
         Producto p = new Producto(codigo, nombre, ubicacion, stockInicial);
         arbolProductos.insertar(p);
         System.out.println("Producto agregado correctamente: " + nombre + " (" + codigo + ")");
+
+        // Si el stock inicial ya es critico, lo encola
         if (stockInicial < UMBRAL_CRITICO) {
             encolarSiCritico(p);
         }
@@ -86,12 +91,15 @@ public class SistemaLogistico {
             System.out.println("Error: la cantidad debe ser mayor a 0.");
             return;
         }
+
         int stockAntes = p.getStockActual();
         p.setStockActual(stockAntes + cantidad);
+
         MovimientoInventario movimiento = new MovimientoInventario(
                 "INGRESO", p.getCodigoUniversal(), p.getNombre(),
                 stockAntes, p.getStockActual(), "Ingreso de " + cantidad + " unidades");
         historialMovimientos.apilar(movimiento);
+
         System.out.println("Ingreso registrado: " + cantidad + " unidades de " + p.getNombre()
                 + ". Stock actual: " + p.getStockActual());
     }
@@ -111,14 +119,18 @@ public class SistemaLogistico {
                     + ", cantidad solicitada: " + cantidad + ".");
             return;
         }
+
         int stockAntes = p.getStockActual();
         p.setStockActual(stockAntes - cantidad);
+
         MovimientoInventario movimiento = new MovimientoInventario(
                 "EGRESO", p.getCodigoUniversal(), p.getNombre(),
                 stockAntes, p.getStockActual(), "Egreso de " + cantidad + " unidades");
         historialMovimientos.apilar(movimiento);
+
         System.out.println("Egreso registrado: " + cantidad + " unidades de " + p.getNombre()
                 + ". Stock actual: " + p.getStockActual());
+
         if (p.getStockActual() < UMBRAL_CRITICO) {
             encolarSiCritico(p);
         }
@@ -233,5 +245,41 @@ public class SistemaLogistico {
 
     public void mostrarInventarioCritico() {
         inventarioCritico.mostrar();
+    }
+
+    // =============================================
+    // OPTIMIZACION DE RECOLECCION - GRAFO + DIJKSTRA
+    // =============================================
+
+    public void agregarPasillo(String nombre) {
+        grafoAlmacen.agregarPasillo(nombre);
+    }
+
+    public void agregarConexion(String origen, String destino, int distancia) {
+        grafoAlmacen.agregarConexion(origen, destino, distancia);
+    }
+
+    public void calcularRutaOptima(String origen, String destino) {
+        if (grafoAlmacen.estaVacio()) {
+            System.out.println("Error: no hay pasillos registrados en el almacen.");
+            return;
+        }
+        grafoAlmacen.calcularRuta(origen, destino);
+    }
+
+    public void mostrarMapa() {
+        grafoAlmacen.mostrarAlmacen();
+    }
+
+    public void calcularRutaHaciaProducto(String codigoProducto, String pasilloOrigen) {
+        Producto p = buscarProducto(codigoProducto);
+        if (p == null) {
+            System.out.println("Error: no existe un producto con el codigo " + codigoProducto + ".");
+            return;
+        }
+        String pasilloDestino = p.getUbicacion();
+        System.out.println("Buscando ruta hacia " + p.getNombre()
+                + " ubicado en " + pasilloDestino + "...");
+        grafoAlmacen.calcularRuta(pasilloOrigen, pasilloDestino);
     }
 }
