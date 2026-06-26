@@ -11,11 +11,7 @@ public class ABB {
         raiz = null;
         cant = 0;
     }
-
-    // =============================================
     // INSERTAR
-    // =============================================
-
     public void insertar(Producto producto) {
         if (raiz == null) {
             raiz = new NodoABB(producto);
@@ -51,10 +47,7 @@ public class ABB {
         }
     }
 
-    // =============================================
     // BUSCAR
-    // =============================================
-
     public Producto buscar(String codigo) {
         NodoABB aux = raiz;
         while (aux != null) {
@@ -69,11 +62,7 @@ public class ABB {
         }
         return null;
     }
-
-    // =============================================
     // ELIMINAR
-    // =============================================
-
     public boolean eliminar(String codigo) {
         NodoABB nodo = buscarNodo(codigo);
         if (nodo == null) {
@@ -139,10 +128,7 @@ public class ABB {
         return nodo;
     }
 
-    // =============================================
     // RECORRIDOS
-    // =============================================
-
     public void mostrarInorden() {
         if (raiz == null) {
             System.out.println("El inventario esta vacio.");
@@ -194,10 +180,7 @@ public class ABB {
         System.out.println("  " + nodo.dato);
     }
 
-    // =============================================
-    // OTROS
-    // =============================================
-
+    // OTRAS FUNCONES
     public int contarNodos() {
         return cant;
     }

@@ -5,16 +5,13 @@ public class Grafo {
     private NodoPasillo primero;
     private int cantidadPasillos;
     static final int INFINITO = Integer.MAX_VALUE / 2;
-
+    //intfinito es que las distancias todavia son desconocidas
     public Grafo() {
         this.primero = null;
         this.cantidadPasillos = 0;
     }
 
-    // =============================================
     // GESTION DE PASILLOS (VERTICES)
-    // =============================================
-
     public void agregarPasillo(String nombre) {
         if (buscarNodoPasillo(nombre) != null) {
             System.out.println("Error: el pasillo " + nombre + " ya existe.");
@@ -48,11 +45,7 @@ public class Grafo {
         }
         return null;
     }
-
-    // =============================================
-    // GESTION DE CONEXIONES (ARISTAS CON PESO)
-    // =============================================
-
+    // GESTION DE CONEXIONES
     public void agregarConexion(String origen, String destino, int distancia) {
         NodoPasillo nodoOrigen = buscarNodoPasillo(origen);
         NodoPasillo nodoDestino = buscarNodoPasillo(destino);
@@ -90,10 +83,7 @@ public class Grafo {
         }
     }
 
-    // =============================================
     // MOSTRAR ALMACEN
-    // =============================================
-
     public void mostrarAlmacen() {
         if (primero == null) {
             System.out.println("El almacen no tiene pasillos registrados.");
@@ -117,9 +107,8 @@ public class Grafo {
         }
     }
 
-    // =============================================
+
     // DIJKSTRA - RUTA OPTIMA
-    // =============================================
 
     public void calcularRuta(String origen, String destino) {
         if (buscarNodoPasillo(origen) == null) {

@@ -30,10 +30,8 @@ public class SistemaLogistico {
         grafoAlmacen = new Grafo();
     }
 
-    // =============================================
-    // GESTION DE PRODUCTOS - ABB
-    // =============================================
 
+    // GESTION DE PRODUCTOS - ABB
     public boolean agregarProducto(String codigo, String nombre, String ubicacion, int stockInicial) {
         if (arbolProductos.buscar(codigo) != null) {
             System.out.println("Error: ya existe un producto con el codigo " + codigo + ".");
@@ -77,10 +75,8 @@ public class SistemaLogistico {
         arbolProductos.mostrarPostorden();
     }
 
-    // =============================================
-    // TRAZABILIDAD DE LOTES - PILA LIFO
-    // =============================================
 
+    // TRAZABILIDAD DE LOTES - PILA LIFO
     public void registrarIngreso(String codigo, int cantidad) {
         Producto p = buscarProducto(codigo);
         if (p == null) {
@@ -157,10 +153,7 @@ public class SistemaLogistico {
         historialMovimientos.mostrar();
     }
 
-    // =============================================
     // LINEA DE EXPEDICION - COLA CIRCULAR FIFO
-    // =============================================
-
     public void agregarPedido(String numero, String destinatario, String destino, int bultos) {
         if (colaExpedicion.contienePedido(numero)) {
             System.out.println("Error: ya existe un pedido con el numero " + numero + " en la cola.");
@@ -247,10 +240,7 @@ public class SistemaLogistico {
         inventarioCritico.mostrar();
     }
 
-    // =============================================
     // OPTIMIZACION DE RECOLECCION - GRAFO + DIJKSTRA
-    // =============================================
-
     public void agregarPasillo(String nombre) {
         grafoAlmacen.agregarPasillo(nombre);
     }

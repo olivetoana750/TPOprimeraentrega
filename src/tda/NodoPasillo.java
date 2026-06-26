@@ -1,5 +1,5 @@
 package tda;
-
+//cada lugar, vertice
 public class NodoPasillo {
     String nombre;
     NodoPasillo siguiente;

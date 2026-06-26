@@ -50,7 +50,6 @@ public class ColaCircular {
         } else {
             Pedido eliminado = datos[frente];
             if (frente == fin) {
-                // Era el ultimo elemento, reiniciar la cola
                 frente = -1;
                 fin = -1;
                 cantidad = 0;

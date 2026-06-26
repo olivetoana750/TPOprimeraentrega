@@ -9,7 +9,7 @@ public class MovimientoInventario {
     private String descripcion;
 
     public MovimientoInventario(String tipoOperacion, String codigoProducto, String nombreProducto,
-                                int stockAntes, int stockDespues, String descripcion) {
+        int stockAntes, int stockDespues, String descripcion) {
         this.tipoOperacion = tipoOperacion;
         this.codigoProducto = codigoProducto;
         this.nombreProducto = nombreProducto;
